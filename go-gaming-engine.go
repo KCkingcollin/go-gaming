@@ -34,6 +34,7 @@ func main() {
 
     gl.Init()
     version := ghf.GetVersionGL()
+    ghf.Test()
     fmt.Println("OpenGL Version", version)
 
 
