@@ -8,15 +8,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type ShaderID uint32
-type ProgramID uint32
-
 const winWidth = 1280
 const winHight = 720
-
-type log struct {
-    log string
-}
 
 func main() {
     err := sdl.Init(sdl.INIT_EVERYTHING)
