@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/KCkingcollin/go-help-func/ghf"
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -31,8 +33,9 @@ func main() {
     defer window.Destroy()
 
     gl.Init()
-    version := gl.GoStr(gl.GetString(gl.VERSION))
+    version := ghf.GetVersionGL()
     fmt.Println("OpenGL Version", version)
+
 
     vertexShaderSource, err := os.ReadFile("shaders/vert.glsl")
     if err != nil {
