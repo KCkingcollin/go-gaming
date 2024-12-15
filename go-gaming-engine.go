@@ -8,6 +8,9 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+type ShaderID uint32
+type ProgramID uint32
+
 const winWidth = 1280
 const winHight = 720
 
@@ -36,7 +39,7 @@ func main() {
     }
     ghf.PrintVersionGL()
 
-    shaderProgram := makeProgram(compileShaders())
+    ProgramID := makeProgram(compileShaders())
 
     vertices := []float32 {
         -0.5, -0.5, 0.0,
@@ -66,7 +69,7 @@ func main() {
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
         gl.Clear(gl.COLOR_BUFFER_BIT)
 
-        gl.UseProgram(shaderProgram)
+        gl.UseProgram(ProgramID)
         gl.BindVertexArray(VAO)
         gl.DrawArrays(gl.TRIANGLES, 0, 3)
 
@@ -96,7 +99,7 @@ func compileShaders() (uint32, uint32) {
 }
 
 func makeProgram(vertexShader, fragmentShader uint32) uint32 {
-    shaderProgram, err := ghf.CreateProgram(vertexShader, fragmentShader)
+    ProgramID, err := ghf.CreateProgram(vertexShader, fragmentShader)
     if err != nil {
         fmt.Printf("Failed to link Shaders: %s \n", err)
     } else {
@@ -106,5 +109,5 @@ func makeProgram(vertexShader, fragmentShader uint32) uint32 {
     gl.DeleteShader(vertexShader)
     gl.DeleteShader(fragmentShader)
 
-    return shaderProgram
+    return ProgramID
 }
