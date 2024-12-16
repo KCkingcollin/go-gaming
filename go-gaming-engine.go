@@ -13,36 +13,7 @@ const winHight = 480
 const fragPath = "shaders/frag.glsl"
 const vertPath = "shaders/vert.glsl"
 
-func compileShaders() (uint32, uint32) {
-    vertexShaderSource := ghf.LoadFile(vertPath)
-    vertexShader, err := ghf.CreateVertexShader(string(vertexShaderSource))
-    if err != nil {
-        fmt.Printf("Failed to compile vertex shader: %s \n", err)
-    } else {
-        println("Vertex shader compiled successfully")
-    }
-
-    fragmentShaderSource := ghf.LoadFile(fragPath)
-    fragmentShader, err := ghf.CreateFragmentShader(string(fragmentShaderSource))
-    if err != nil {
-        fmt.Printf("Failed to compile fragment shader: %s \n", err)
-    } else {
-        println("Fragment shader compiled successfully")
-    }
-
-    return vertexShader, fragmentShader
-}
-
 func makeProgram(vertexShader, fragmentShader uint32) uint32 {
-    ProgramID, err := ghf.CreateProgram(vertexShader, fragmentShader)
-    if err != nil {
-        fmt.Printf("Failed to link Shaders: %s \n", err)
-    } else {
-        println("Program linked successfully")
-    }
-
-    gl.DeleteShader(vertexShader)
-    gl.DeleteShader(fragmentShader)
 
     return ProgramID
 }
@@ -68,7 +39,12 @@ func main() {
     }
     ghf.PrintVersionGL()
 
-    ProgramID := makeProgram(compileShaders())
+    ProgramID, err := ghf.CreateProgram(vertPath, fragPath)
+    if err != nil {
+        fmt.Printf("Failed to link Shaders: %s \n", err)
+    } else {
+        println("Program linked successfully")
+    }
 
     vertices := []float32 {
         0.5, 0.5, 0.0, 1.0, 1.0, 
@@ -95,7 +71,8 @@ func main() {
 
     gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
     gl.EnableVertexAttribArray(0)
-    gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, 5*4, 2*4)
+    gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, 5*4, 3*4)
+    gl.EnableVertexAttribArray(1)
     gl.BindVertexArray(0)
 
     for {
@@ -115,7 +92,6 @@ func main() {
         window.GLSwap()
 
         if ghf.CheckShadersforChanges() {
-            ghf.ResetLoadedShaders()
             ProgramID = makeProgram(compileShaders())
         }
     }

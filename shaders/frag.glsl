@@ -8,11 +8,18 @@
 //
 
 #define OCTAVES 5
-out vec4 FragColor;
-in vec2 TexCoord;
 
-uniform float x;
-uniform float y;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) in inBlock 
+{
+    vec4 TexCoord;
+};
+
+layout(set=0, binding = 0) uniform uniformBlock
+{
+    float x;
+    float y;
+}; 
 
 vec3 mod289(vec3 x)
 {
