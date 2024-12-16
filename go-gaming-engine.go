@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/KCkingcollin/go-help-func/ghf"
+	"github.com/KCkingcollin/go-help-func/glf"
 	"github.com/go-gl/gl/v4.6-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -13,7 +14,6 @@ const winHight = 480
 const fragPath = "shaders/frag.glsl"
 const vertPath = "shaders/vert.glsl"
 
-// var verbose bool = ghf.Verbose()
 
 func main() {
     err := sdl.Init(sdl.INIT_EVERYTHING)
@@ -34,9 +34,9 @@ func main() {
     if err != nil {
         panic(err)
     }
-    ghf.PrintVersionGL()
+    glf.PrintVersionGL()
 
-    ShaderProg1, err := ghf.NewShaderProgram(vertPath, fragPath)
+    ShaderProg1, err := glf.NewShaderProgram(vertPath, fragPath)
     if err != nil && ghf.Verbose {
         fmt.Printf("Failed to link Shaders: %s \n", err)
     } else if ghf.Verbose {
@@ -59,12 +59,12 @@ func main() {
         1, 2, 3, // triangle 2
     }
     
-    // VBO := ghf.GenBindBuffers(gl.ARRAY_BUFFER)
-    ghf.GenBindBuffers(gl.ARRAY_BUFFER)
-    VAO := ghf.GenBindArrays()
-    ghf.BufferDataFloat(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-    ghf.GenBindBuffers(gl.ELEMENT_ARRAY_BUFFER)
-    ghf.BufferDataInt(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+    // VBO := glf.GenBindBuffers(gl.ARRAY_BUFFER)
+    glf.GenBindBuffers(gl.ARRAY_BUFFER)
+    VAO := glf.GenBindArrays()
+    glf.BufferDataFloat(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+    glf.GenBindBuffers(gl.ELEMENT_ARRAY_BUFFER)
+    glf.BufferDataInt(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
     gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
     gl.EnableVertexAttribArray(0)
@@ -88,7 +88,7 @@ func main() {
 
         window.GLSwap()
 
-        ghf.CheckShadersforChanges()
+        glf.CheckShadersforChanges()
     }
 } 
 
