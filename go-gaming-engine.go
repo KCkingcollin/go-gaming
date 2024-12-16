@@ -13,6 +13,8 @@ const winHight = 480
 const fragPath = "shaders/frag.glsl"
 const vertPath = "shaders/vert.glsl"
 
+// var verbose bool = ghf.Verbose()
+
 func main() {
     err := sdl.Init(sdl.INIT_EVERYTHING)
     if err != nil {
@@ -35,9 +37,9 @@ func main() {
     ghf.PrintVersionGL()
 
     ShaderProg1, err := ghf.NewShaderProgram(vertPath, fragPath)
-    if err != nil {
+    if err != nil && ghf.Verbose {
         fmt.Printf("Failed to link Shaders: %s \n", err)
-    } else {
+    } else if ghf.Verbose {
         println("Program linked successfully")
     }
 
