@@ -1,5 +1,5 @@
 #version 460 core
-// out vec4 FragColor;
+// layout (location = 0) out vec4 FragColor;
 //
 // void main()
 // {
@@ -10,12 +10,9 @@
 #define OCTAVES 5
 
 layout (location = 0) out vec4 FragColor;
-layout (location = 1) in inBlock 
-{
-    vec4 TexCoord;
-};
+in vec2 TexCoord;
 
-layout(set=0, binding = 0) uniform uniformBlock
+layout (binding = 0) uniform uniformBlock
 {
     float x;
     float y;
@@ -156,29 +153,29 @@ vec3 fractalNebula(in vec2 coord, vec3 color, float transparency)
 void main()
 {
     //float resolution = max(iResolution.y, iResolution.y);
-    
+
     vec2 coord = TexCoord.xy;
 	vec2 pos = vec2(x,y);
 
     vec3 result = vec3(0.);
 
-	
+
     vec2 nebula1pos = coord + pos *.010;
     vec2 nebula2pos = coord + pos * .015;
     vec2 star1pos = coord  + pos * .02;
     vec2 star2pos = coord  + pos *.05;
     vec2 star3pos = coord + pos *.1; 
-            
+
     vec3 nebulaColor1 = hsv2rgb(vec3(.9+.005*sin(nebula1pos.x * 100.0 + nebula1pos.y), 0.5, .25));
 	vec3 nebulaColor2 = hsv2rgb(vec3(.1+.001*sin(nebula2pos.x * 60.0 + nebula2pos.y), 1., .25));
 
     result += fractalNebula(nebula1pos, nebulaColor1, 1.);
     result += fractalNebula(nebula2pos + vec2(5., 7.2), nebulaColor2, .5);
-    
+
     result += stars(star3pos, 4., 0.1, 2.) * vec3(.74, .74, .74);
     result += stars(star2pos, 8., 0.05, 1.) * vec3(.97, .74, .74);
     result += stars(star1pos, 16., 0.025, 0.5) * vec3(.9, .9, .95);
-    
+
     FragColor = vec4(result, 1.);
-   
+
 }

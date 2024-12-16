@@ -34,7 +34,7 @@ func main() {
     }
     ghf.PrintVersionGL()
 
-    ProgramID, err := ghf.CreateProgram(vertPath, fragPath)
+    ShaderProg1, err := ghf.NewShaderProgram(vertPath, fragPath)
     if err != nil {
         fmt.Printf("Failed to link Shaders: %s \n", err)
     } else {
@@ -80,7 +80,7 @@ func main() {
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
         gl.Clear(gl.COLOR_BUFFER_BIT)
 
-        gl.UseProgram(ProgramID)
+        ShaderProg1.Use()
         gl.BindVertexArray(VAO)
         gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(indices)), gl.UNSIGNED_INT, 0)
 
