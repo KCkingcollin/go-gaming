@@ -13,11 +13,6 @@ const winHight = 480
 const fragPath = "shaders/frag.glsl"
 const vertPath = "shaders/vert.glsl"
 
-func makeProgram(vertexShader, fragmentShader uint32) uint32 {
-
-    return ProgramID
-}
-
 func main() {
     err := sdl.Init(sdl.INIT_EVERYTHING)
     if err != nil {
@@ -91,9 +86,7 @@ func main() {
 
         window.GLSwap()
 
-        if ghf.CheckShadersforChanges() {
-            ProgramID = makeProgram(compileShaders())
-        }
+        ghf.CheckShadersforChanges()
     }
 } 
 
