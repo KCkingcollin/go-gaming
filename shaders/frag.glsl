@@ -10,7 +10,13 @@
 #define OCTAVES 5
 
 layout (location = 0) out vec4 FragColor;
-in vec2 TexCoord;
+layout (location = 1) in InBlock
+{
+    vec2 TexCoord;
+};
+
+// uniform float x;
+// uniform float y;
 
 layout (binding = 0) uniform uniformBlock
 {

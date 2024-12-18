@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"unsafe"
 
 	"github.com/KCkingcollin/go-help-func/ghf"
 	"github.com/KCkingcollin/go-help-func/glf"
@@ -48,10 +49,6 @@ func main() {
         0.5, -0.5, 0.0, 1.0, 0.0, 
         -0.5, -0.5, 0.0, 0.0, 0.0, 
         -0.5, 0.5, 0.0, 0.0, 1.0, 
-
-        // 0.5, -0.5, 0.0,
-        // -0.5, 0.5, 0.0, 
-        // 0.5, 0.5, 0.0, 
     }
 
     indices := []uint32 {
@@ -59,12 +56,23 @@ func main() {
         1, 2, 3, // triangle 2
     }
     
-    // VBO := glf.GenBindBuffers(gl.ARRAY_BUFFER)
+    uniforms := []float32 {
+        0.0, // float x
+        0.0, // float y
+    }
+    var x float32 = uniforms[0]
+    var y float32 = uniforms[1]
+
     glf.GenBindBuffers(gl.ARRAY_BUFFER)
     VAO := glf.GenBindArrays()
-    glf.BufferDataFloat(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+    glf.BufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+
     glf.GenBindBuffers(gl.ELEMENT_ARRAY_BUFFER)
-    glf.BufferDataInt(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+    glf.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+    
+    UBO := glf.GenBindBuffers(gl.UNIFORM_BUFFER)
+    glf.BufferData(gl.UNIFORM_BUFFER, uniforms, gl.DYNAMIC_DRAW)
+    gl.BindBufferBase(gl.UNIFORM_BUFFER, 0, UBO)
 
     gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
     gl.EnableVertexAttribArray(0)
@@ -83,10 +91,24 @@ func main() {
         gl.Clear(gl.COLOR_BUFFER_BIT)
 
         ShaderProg1.Use()
+
         gl.BindVertexArray(VAO)
         gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(indices)), gl.UNSIGNED_INT, 0)
 
         window.GLSwap()
+
+        x += 0.01
+        y += 0.01
+        vars := []float32 {
+            x, 
+            y, 
+        }
+        
+        for i := range vars {
+            gl.BindBuffer(gl.UNIFORM_BUFFER, UBO)
+            gl.BufferSubData(gl.UNIFORM_BUFFER, i*4, 4, unsafe.Pointer(&vars[i]))
+            gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
+        }
 
         glf.CheckShadersforChanges()
     }
