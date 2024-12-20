@@ -94,30 +94,15 @@ func main() {
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
         gl.Clear(gl.COLOR_BUFFER_BIT)
 
-        // for event := range keyboardState {
-        //     switch event {
-        //     case sdl.SCANCODE_LEFT | sdl.SCANCODE_A:
-        //         x = x - 0.1
-        //     case sdl.SCANCODE_RIGHT | sdl.SCANCODE_D:
-        //         x = x + 0.1
-        //     case sdl.SCANCODE_DOWN | sdl.SCANCODE_S:
-        //         z = z - 0.1
-        //     case sdl.SCANCODE_UP | sdl.SCANCODE_W:
-        //         z = z + 0.1
-        //     }
-        //
-        // }
-        if keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0 {
-            x = x + .1
-        }
-        if keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0 {
-            x = x - .1
-        }
-        if keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0 {
-            z = z - .1
-        }
-        if keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0 {
-            z = z + .1
+        switch {
+        case keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0:
+            x += 0.1
+        case keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0:
+            x -= 0.1
+        case keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0:
+            z -= 0.1
+        case keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0:
+            z += 0.1
         }
 
         ShaderProg1.Use()
