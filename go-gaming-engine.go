@@ -42,6 +42,7 @@ func main() {
     err != nil {
         panic(err)
     }
+    gl.Enable(gl.DEPTH_TEST)
     glf.PrintVersionGL()
 
     ShaderProg1, err := glf.NewShaderProgram(vertPath, fragPath)
@@ -70,7 +71,7 @@ func main() {
     keyboardState := sdl.GetKeyboardState()
 
     var x float32
-    var z float32
+    var z float32 = -3.0
 
     for {
         for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
@@ -82,17 +83,12 @@ func main() {
                 case sdl.WINDOWEVENT_SIZE_CHANGED:
                     winWidth, winHeight = window.GetSize()
                     gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
-                case sdl.WINDOWEVENT_MOVED:
-                    // Handle window move events, maybe log or adjust behavior
-                case sdl.WINDOWEVENT_FOCUS_GAINED:
-                    // Handle focus events
-                case sdl.WINDOWEVENT_FOCUS_LOST:
                 }
             }
         }
 
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
-        gl.Clear(gl.COLOR_BUFFER_BIT)
+        gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         switch {
         case keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0:

@@ -7,7 +7,7 @@ import (
 )
 
 func LocalSpace() ([]float32, uint32, uint32) {
-    texture := glf.LoadTexture("./assets/tex.png")
+    texture := glf.LoadTexture("./assets/metalbox_full.png")
 
 	vertices := []float32{
 		-0.5, -0.5, -0.5, 0.0, 0.0,
