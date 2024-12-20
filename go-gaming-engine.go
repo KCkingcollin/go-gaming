@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"unsafe"
 
 	spaces "github.com/KCkingcollin/go-gaming/bin"
 	"github.com/KCkingcollin/go-help-func/ghf"
@@ -62,13 +61,10 @@ func main() {
     // }
     // uniformVars := uniforms
 
-    uniforms0Mat4 := make([]float32, 3*16)
-    for i := range uniforms0Mat4 {
-        uniforms0Mat4[i] = 0.0
-    }
+    Mat4s := make([]mgl32.Mat4, 3)
 
     UBO1 := glf.GenBindBuffers(gl.UNIFORM_BUFFER)
-    glf.BufferData(gl.UNIFORM_BUFFER, uniforms0Mat4, gl.DYNAMIC_DRAW)
+    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, 3*16), gl.DYNAMIC_DRAW)
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
 
     for {
@@ -98,31 +94,20 @@ func main() {
         projectionMatrix := mgl32.Perspective(mgl32.DegToRad(45.0), float32(winWidth)/float32(winHight), 0.1, 100.0)
         viewMatrix := mgl32.Ident4()
         viewMatrix = mgl32.Translate3D(0.0, 0.0, -3.0)
-        // var modelMatrix mgl32.Mat4
-        // ShaderProg1.SetMat4("projection", projectionMatrix)
-        // ShaderProg1.SetMat4("view", viewMatrix)
+        Mat4s[2] = projectionMatrix
+        Mat4s[1] = viewMatrix
 
         glf.BindTexture(texture)
         gl.BindVertexArray(VAO)
-        // gl.DrawElementsWithOffset(gl.TRIANGLES, int32(len(indices)), gl.UNSIGNED_INT, 0)
         for _, pos := range positions {
             modelMatrix := mgl32.Ident4()
             modelMatrix = mgl32.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(modelMatrix)
             // angle := 20.0 * float32(i)
             // modelMatrix = mgl32.Rotate3DY(mgl32.DegToRad(angle))
-            // ShaderProg1.SetMat4("model", modelMatrix)
-            Mat4 := []mgl32.Mat4 {
-                modelMatrix, 
-                viewMatrix, 
-                projectionMatrix, 
-            }
+            Mat4s[0] = modelMatrix
+            
+            glf.BindBufferSubDataMat4(Mat4s, UBO1)
 
-            for i := range Mat4 {
-                mat := [16]float32(Mat4[i])
-                gl.BindBuffer(gl.UNIFORM_BUFFER, UBO1)
-                gl.BufferSubData(gl.UNIFORM_BUFFER, i*4*16, 4*16, unsafe.Pointer(&mat))
-                gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
-            }
             gl.DrawArrays(gl.TRIANGLES, 0, int32(len(vertices)/5*3))
         }
 
@@ -133,12 +118,6 @@ func main() {
         // uniformVars = []float32 {
         //     uniformVars[0] + 0.01, // x movement 
         //     uniformVars[1] + 0.01, // y movement
-        // }
-
-        // for i := range uniformVars {
-        //     gl.BindBuffer(gl.UNIFORM_BUFFER, UBO0)
-        //     gl.BufferSubData(gl.UNIFORM_BUFFER, i*4, 4, unsafe.Pointer(&uniformVars[i]))
-        //     gl.BindBuffer(gl.UNIFORM_BUFFER, 0)
         // }
     }
 } 
