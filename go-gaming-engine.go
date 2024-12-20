@@ -114,11 +114,11 @@ func main() {
 
         glf.BindTexture(texture)
         gl.BindVertexArray(VAO)
-        for _, pos := range positions {
+        for i, pos := range positions {
             modelMatrix := mgl32.Ident4()
+            angle := 20.0 * float32(i)
+            modelMatrix = mgl32.HomogRotate3D(mgl32.DegToRad(angle), mgl32.Vec3{1.0, 0.3, 0.5}).Mul4(modelMatrix)
             modelMatrix = mgl32.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(modelMatrix)
-            // angle := 20.0 * float32(i)
-            // modelMatrix = mgl32.Rotate3DY(mgl32.DegToRad(angle))
             Mat4s[0] = modelMatrix
             
             glf.BindBufferSubDataMat4(Mat4s, UBO1)

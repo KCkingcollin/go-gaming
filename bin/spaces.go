@@ -53,17 +53,9 @@ func LocalSpace() ([]float32, uint32, uint32) {
 		-0.5, 0.5, -0.5, 0.0, 1.0, 
     }
     
-    // indices := []uint32 {
-    //     0, 1, 3, // triangle 1
-    //     1, 2, 3, // triangle 2
-    // }
-
     glf.GenBindBuffers(gl.ARRAY_BUFFER)
     VAO := glf.GenBindArrays()
     glf.BufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-
-    // glf.GenBindBuffers(gl.ELEMENT_ARRAY_BUFFER)
-    // glf.BufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
     gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
     gl.EnableVertexAttribArray(0)
@@ -78,6 +70,7 @@ func WorldSpace() []mgl32.Vec3 {
     cubePositions := []mgl32.Vec3{
         {0.0, 0.0, 0.0}, 
         {2.0, 5.0, -10.0}, 
+        {1.0, -5.0, 1.0}, 
     }
     return cubePositions
 }
