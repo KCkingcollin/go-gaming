@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	spaces "github.com/KCkingcollin/go-gaming/bin"
 	"github.com/KCkingcollin/go-help-func/ghf"
@@ -56,12 +57,6 @@ func main() {
 
     positions := spaces.WorldSpace()
 
-    // VirtUniforms := []float32 {
-    //     0.0, // float x
-    //     0.0, // float y
-    // }
-    // uniformVars := uniforms
-
     Mat4s := make([]mgl32.Mat4, 3)
 
     UBO1 := glf.GenBindBuffers(gl.UNIFORM_BUFFER)
@@ -70,10 +65,15 @@ func main() {
 
     keyboardState := sdl.GetKeyboardState()
 
-    var x float32
-    var z float32 = -3.0
+    camPos := mgl32.Vec3{0.0, 0.0, 3.0}
+    worldUp := mgl32.Vec3{0.0, 1.0, 0.0}
+    camera := glf.NewCamera(camPos, worldUp, -90.0, -45.0, 0.02, 0.2)
 
+    var elapsedTime float32 = 0.0
+
+    prevMouseX, prevMouseY, _ := sdl.GetMouseState()
     for {
+        frameStart := time.Now()
         for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
             switch event := event.(type) {
             case *sdl.QuitEvent:
@@ -87,24 +87,32 @@ func main() {
             }
         }
 
+        dir := glf.NoWhere
+        switch {
+        case keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0:
+            dir = glf.Left
+        case keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0:
+            dir = glf.Right
+        case keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0:
+            dir = glf.Forward
+        case keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0:
+            dir = glf.Backward
+        default:
+
+        }
+        mouseX, mouseY, _ := sdl.GetMouseState()
+        fmt.Print("yaw:", camera.Yaw, " pitch:", camera.Pitch, "\n")
+
+        camera.UpdateCamera(dir, elapsedTime, float32(mouseX-prevMouseX), float32(mouseY-prevMouseY))
+        prevMouseX = mouseX
+        prevMouseY = mouseY
+
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-        switch {
-        case keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0:
-            x += 0.1
-        case keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0:
-            x -= 0.1
-        case keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0:
-            z -= 0.1
-        case keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0:
-            z += 0.1
-        }
-
         ShaderProg1.Use()
         projectionMatrix := mgl32.Perspective(mgl32.DegToRad(45.0), float32(winWidth)/float32(winHeight), 0.1, 100.0)
-        viewMatrix := mgl32.Ident4()
-        viewMatrix = mgl32.Translate3D(x, 0.0, z)
+        viewMatrix := camera.GetViewMatrix()
         Mat4s[2] = projectionMatrix
         Mat4s[1] = viewMatrix
 
@@ -126,10 +134,7 @@ func main() {
 
         glf.CheckShadersforChanges()
 
-        // uniformVars = []float32 {
-        //     uniformVars[0] + 0.01, // x movement 
-        //     uniformVars[1] + 0.01, // y movement
-        // }
+        elapsedTime = float32(time.Since(frameStart).Seconds()*1000)
     }
 } 
 
