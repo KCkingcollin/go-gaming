@@ -2,12 +2,12 @@
 
 layout (location = 0) out vec4 FragColor;
 
-layout (location = 1) in InBlock
+layout (location = 2) in InBlock
 {
     vec2 TexCoord;
 };
 
-layout (binding = 1) uniform sampler2D texture1;
+layout (binding = 0) uniform sampler2D texture1;
 
 void main() {
     FragColor = texture(texture1, TexCoord);

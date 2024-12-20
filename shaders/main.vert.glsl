@@ -8,11 +8,16 @@ layout (location = 2) out InBlock
     vec2 TexCoord;
 };
 
-layout (binding = 0) uniform Matrixs {
+layout (binding = 1) uniform Matrixs 
+{
     mat4 model;
     mat4 view;
     mat4 projection;
 };
+
+// uniform mat4 model;
+// uniform mat4 view;
+// uniform mat4 projection;
 
 void main()
 {
