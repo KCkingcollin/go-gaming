@@ -8,7 +8,7 @@ import (
 	"github.com/KCkingcollin/go-help-func/ghf"
 	"github.com/KCkingcollin/go-help-func/glf"
 	"github.com/go-gl/gl/v4.6-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -57,7 +57,7 @@ func main() {
 
     positions := spaces.WorldSpace()
 
-    Mat4s := make([]mgl32.Mat4, 3)
+    Mat4s := make([]mgl64.Mat4, 3)
 
     UBO1 := glf.GenBindBuffers(gl.UNIFORM_BUFFER)
     glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, 3*16), gl.DYNAMIC_DRAW)
@@ -65,13 +65,17 @@ func main() {
 
     keyboardState := sdl.GetKeyboardState()
 
-    camPos := mgl32.Vec3{0.0, 0.0, 3.0}
-    worldUp := mgl32.Vec3{0.0, 1.0, 0.0}
+    camPos := mgl64.Vec3{0.0, 0.0, 3.0}
+    worldUp := mgl64.Vec3{0.0, 1.0, 0.0}
     camera := glf.NewCamera(camPos, worldUp, -90.0, -45.0, 0.02, 0.2)
 
-    var elapsedTime float32 = 0.0
+    var elapsedTime float64 = 0.0
 
     prevMouseX, prevMouseY, _ := sdl.GetMouseState()
+
+    var timeCount float64 = 0.0
+    var FramCount int = 0.0
+
     for {
         frameStart := time.Now()
         for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
@@ -82,7 +86,7 @@ func main() {
                 switch event.Event {
                 case sdl.WINDOWEVENT_SIZE_CHANGED:
                     winWidth, winHeight = window.GetSize()
-                    gl.Viewport(0, 0, int32(winWidth), int32(winHeight))
+                    gl.Viewport(0, 0, winWidth, winHeight)
                 }
             }
         }
@@ -101,9 +105,8 @@ func main() {
 
         }
         mouseX, mouseY, _ := sdl.GetMouseState()
-        fmt.Print("yaw:", camera.Yaw, " pitch:", camera.Pitch, "\n")
 
-        camera.UpdateCamera(dir, elapsedTime, float32(mouseX-prevMouseX), float32(mouseY-prevMouseY))
+        camera.UpdateCamera(dir, elapsedTime, float64(mouseX-prevMouseX), float64(mouseY-prevMouseY))
         prevMouseX = mouseX
         prevMouseY = mouseY
 
@@ -111,7 +114,7 @@ func main() {
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         ShaderProg1.Use()
-        projectionMatrix := mgl32.Perspective(mgl32.DegToRad(45.0), float32(winWidth)/float32(winHeight), 0.1, 100.0)
+        projectionMatrix := mgl64.Perspective(mgl64.DegToRad(45.0), float64(winWidth)/float64(winHeight), 0.1, 100.0)
         viewMatrix := camera.GetViewMatrix()
         Mat4s[2] = projectionMatrix
         Mat4s[1] = viewMatrix
@@ -119,13 +122,13 @@ func main() {
         glf.BindTexture(texture)
         gl.BindVertexArray(VAO)
         for i, pos := range positions {
-            modelMatrix := mgl32.Ident4()
-            angle := 20.0 * float32(i)
-            modelMatrix = mgl32.HomogRotate3D(mgl32.DegToRad(angle), mgl32.Vec3{1.0, 0.3, 0.5}).Mul4(modelMatrix)
-            modelMatrix = mgl32.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(modelMatrix)
+            modelMatrix := mgl64.Ident4()
+            angle := 20.0 * float64(i)
+            modelMatrix = mgl64.HomogRotate3D(mgl64.DegToRad(angle), mgl64.Vec3{1.0, 0.3, 0.5}).Mul4(modelMatrix)
+            modelMatrix = mgl64.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(modelMatrix)
             Mat4s[0] = modelMatrix
             
-            glf.BindBufferSubDataMat4(Mat4s, UBO1)
+            glf.BindBufferSubDataMat4(ghf.Mgl64to32Mat4Slice(Mat4s), UBO1)
 
             gl.DrawArrays(gl.TRIANGLES, 0, int32(len(vertices)/5*3))
         }
@@ -134,7 +137,15 @@ func main() {
 
         glf.CheckShadersforChanges()
 
-        elapsedTime = float32(time.Since(frameStart).Seconds()*1000)
+        if timeCount < 1000 {
+            FramCount++
+            timeCount += elapsedTime
+        } else {
+            println(FramCount)
+            timeCount = 0.0
+            FramCount = 0.0
+        }
+        elapsedTime = float64(time.Since(frameStart).Seconds()*1000)
     }
 } 
 

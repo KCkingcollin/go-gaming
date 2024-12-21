@@ -3,7 +3,7 @@ package spaces
 import (
 	"github.com/KCkingcollin/go-help-func/glf"
 	"github.com/go-gl/gl/v4.6-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 func LocalSpace() ([]float32, uint32, uint32) {
@@ -66,8 +66,8 @@ func LocalSpace() ([]float32, uint32, uint32) {
     return vertices, texture, VAO
 }
 
-func WorldSpace() []mgl32.Vec3 {
-    cubePositions := []mgl32.Vec3{
+func WorldSpace() []mgl64.Vec3 {
+    cubePositions := []mgl64.Vec3{
         {0.0, 0.0, 0.0}, 
         {2.0, 5.0, -10.0}, 
         {1.0, -5.0, 1.0}, 
