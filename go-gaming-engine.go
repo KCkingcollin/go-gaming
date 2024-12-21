@@ -46,6 +46,9 @@ func main() {
     gl.Enable(gl.DEPTH_TEST)
     glf.PrintVersionGL()
 
+    // Vsync rate
+    sdl.GLSetSwapInterval(0)
+
     ShaderProg1, err := glf.NewShaderProgram(vertPath, fragPath)
     if err != nil && ghf.Verbose {
         fmt.Printf("Failed to link Shaders: %s \n", err)
@@ -137,15 +140,15 @@ func main() {
 
         glf.CheckShadersforChanges()
 
-        if timeCount < 1000 {
-            FramCount++
-            timeCount += elapsedTime
-        } else {
+        timeCount += elapsedTime
+        FramCount++
+
+        if timeCount >= 1000.0 {
             println(FramCount)
             timeCount = 0.0
-            FramCount = 0.0
+            FramCount = 0
         }
-        elapsedTime = float64(time.Since(frameStart).Seconds()*1000)
+        elapsedTime = float64(time.Since(frameStart).Nanoseconds())*0.000001
     }
 } 
 
