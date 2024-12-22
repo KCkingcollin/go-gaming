@@ -29,7 +29,7 @@ func main() {
     window, err := sdl.CreateWindow("GO Gaming Engine",
     sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
     winWidth, winHeight,
-    sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE|sdl.WINDOW_BORDERLESS)
+    sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
     if err != nil {
         panic(err)
     }
@@ -39,15 +39,17 @@ func main() {
     }
     defer window.Destroy()
 
+    sdl.SetRelativeMouseMode(true)
+
+    // Vsync rate
+    sdl.GLSetSwapInterval(1)
+
     if err := gl.Init();
     err != nil {
         panic(err)
     }
     gl.Enable(gl.DEPTH_TEST)
     glf.PrintVersionGL()
-
-    // Vsync rate
-    sdl.GLSetSwapInterval(0)
 
     ShaderProg1, err := glf.NewShaderProgram(vertPath, fragPath)
     if err != nil && ghf.Verbose {
@@ -68,19 +70,23 @@ func main() {
 
     keyboardState := sdl.GetKeyboardState()
 
-    camPos := mgl64.Vec3{0.0, 0.0, 3.0}
+    camPos := mgl64.Vec3{0.0, 0.0, 0.0}
     worldUp := mgl64.Vec3{0.0, 1.0, 0.0}
-    camera := glf.NewCamera(camPos, worldUp, -90.0, -45.0, 0.02, 0.2)
+    camera := glf.NewCamera(camPos, worldUp, -90.0, 0.0, 0.02, 0.2)
 
-    var elapsedTime float64 = 0.0
+    var elapsedTime float64
+    var deltaT float64
+    var timeCount float64
+    var FrameCount int
 
-    prevMouseX, prevMouseY, _ := sdl.GetMouseState()
+    var mouseX, mouseY int32
 
-    var timeCount float64 = 0.0
-    var FramCount int = 0.0
-
+    var FrameRateLimit int = 500
+    maxFrameTime := float64(1000) / float64(FrameRateLimit) // in milliseconds
     for {
         frameStart := time.Now()
+        mouseX, mouseY = 0, 0
+        dir := glf.NoWhere
         for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
             switch event := event.(type) {
             case *sdl.QuitEvent:
@@ -90,28 +96,40 @@ func main() {
                 case sdl.WINDOWEVENT_SIZE_CHANGED:
                     winWidth, winHeight = window.GetSize()
                     gl.Viewport(0, 0, winWidth, winHeight)
+                case sdl.WINDOWEVENT_FOCUS_GAINED: // Window gains focus
+                    sdl.SetRelativeMouseMode(true)
+                    sdl.GLSetSwapInterval(0)
+                case sdl.WINDOWEVENT_FOCUS_LOST:
+                    sdl.SetRelativeMouseMode(false)
+                    sdl.GLSetSwapInterval(1)
                 }
+            case *sdl.MouseMotionEvent:
+                mouseX += event.XRel
+                mouseY += event.YRel
             }
         }
 
-        dir := glf.NoWhere
-        switch {
-        case keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0:
+        deltaT = elapsedTime*0.000001
+        if keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0 {
             dir = glf.Left
-        case keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0:
-            dir = glf.Right
-        case keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0:
-            dir = glf.Forward
-        case keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0:
-            dir = glf.Backward
-        default:
-
+            camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
         }
-        mouseX, mouseY, _ := sdl.GetMouseState()
-
-        camera.UpdateCamera(dir, elapsedTime, float64(mouseX-prevMouseX), float64(mouseY-prevMouseY))
-        prevMouseX = mouseX
-        prevMouseY = mouseY
+        if keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0 {
+            dir = glf.Right
+            camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
+        }
+        if keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0 {
+            dir = glf.Forward
+            camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
+        }
+        if keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0 {
+            dir = glf.Backward
+            camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
+        }
+        if keyboardState[sdl.SCANCODE_ESCAPE] != 0 {
+            sdl.SetRelativeMouseMode(false)
+        }
+        camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
 
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -137,18 +155,23 @@ func main() {
         }
 
         window.GLSwap()
-
         glf.CheckShadersforChanges()
 
-        timeCount += elapsedTime
-        FramCount++
-
-        if timeCount >= 1000.0 {
-            println(FramCount)
-            timeCount = 0.0
-            FramCount = 0
+        // Frame rate limiter
+        elapsedTime = float64(time.Since(frameStart).Milliseconds()) // elapsed time in ms
+        if elapsedTime < maxFrameTime {
+            time.Sleep(time.Duration(maxFrameTime-elapsedTime) * time.Millisecond)
+            elapsedTime = maxFrameTime // Update elapsedTime to the capped frame time
         }
-        elapsedTime = float64(time.Since(frameStart).Nanoseconds())*0.000001
+
+        // FPS Counter
+        timeCount += elapsedTime
+        FrameCount++
+        if timeCount >= 1000.0 {
+            println(FrameCount)
+            timeCount = 0.0
+            FrameCount = 0
+        }
     }
 } 
 

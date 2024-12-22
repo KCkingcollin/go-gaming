@@ -67,10 +67,10 @@ func LocalSpace() ([]float32, uint32, uint32) {
 }
 
 func WorldSpace() []mgl64.Vec3 {
-    cubePositions := []mgl64.Vec3{
+    positions := []mgl64.Vec3{
         {0.0, 0.0, 0.0}, 
         {2.0, 5.0, -10.0}, 
         {1.0, -5.0, 1.0}, 
     }
-    return cubePositions
+    return positions
 }
