@@ -118,6 +118,35 @@ func initBuffers() {
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
 }
 
+func gameLoop() {
+    for {
+        frameStart = time.Now()
+        if pollEvents() {
+            return
+        }
+        cameraEvents()
+        frameRendering()
+
+        elapsedTime = time.Since(frameStart) // elapsed time in ns
+        computeTime = time.Since(frameStart)
+        if FrameRateLimit <= 5 {
+            fmt.Printf("Compute time = %v\n", computeTime)
+        }
+
+        // Frame rate limiter
+        // for time.Since(frameStart).Nanoseconds() < MaxFrameTime {}
+        limitFrameRate(computeTime, int(FrameRateLimit))
+
+        // FPS Counter
+        FrameCount++
+        if time.Since(TimeCount).Nanoseconds() >= TimeFactor {
+            println(FrameCount)
+            TimeCount = time.Now()
+            FrameCount = 0
+        }
+    }
+}
+
 func pollEvents() bool {
     mouseX, mouseY = 0, 0
     for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
@@ -223,35 +252,6 @@ func limitFrameRate(elapsedTime time.Duration, fps int) {
             fmt.Printf("Waiting for %v...\n", waitTime)
         }
         time.Sleep(waitTime)
-    }
-}
-
-func gameLoop() {
-    for {
-        frameStart = time.Now()
-        if pollEvents() {
-            return
-        }
-        cameraEvents()
-
-        frameRendering()
-
-        elapsedTime = time.Since(frameStart) // elapsed time in ns
-        computeTime = time.Since(frameStart)
-        if FrameRateLimit <= 5 {
-            fmt.Printf("Compute time = %v\n", computeTime)
-        }
-        // Frame rate limiter
-        // for time.Since(frameStart).Nanoseconds() < MaxFrameTime {}
-        limitFrameRate(computeTime, int(FrameRateLimit))
-
-        // FPS Counter
-        FrameCount++
-        if time.Since(TimeCount).Nanoseconds() >= TimeFactor {
-            println(FrameCount)
-            TimeCount = time.Now()
-            FrameCount = 0
-        }
     }
 }
 
