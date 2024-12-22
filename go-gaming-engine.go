@@ -12,8 +12,23 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+var InMenu bool = true
+
+var keyboardState []uint8 = sdl.GetKeyboardState()
+
+var camPos mgl64.Vec3 = mgl64.Vec3{0.0, 0.0, 0.0}
+var worldUp mgl64.Vec3 = mgl64.Vec3{0.0, 1.0, 0.0}
+
+var camera *glf.Camera = glf.NewCamera(camPos, worldUp, -90.0, 0.0, 0.02, 0.2)
+
 var winWidth int32 = 854
 var winHeight int32 = 480
+
+var DisplayRatio float64 = float64(winWidth / winHeight)
+var FrameRateLimit float64 = 500
+var TimeFactor float64 = float64(time.Second/time.Nanosecond) 
+var MaxFrameTime float64 = TimeFactor / FrameRateLimit // in milliseconds
+
 const fragPath = "./shaders/quadtexture.frag.glsl"
 const vertPath = "./shaders/main.vert.glsl"
 
@@ -38,8 +53,6 @@ func main() {
         panic(err)
     }
     defer window.Destroy()
-
-    sdl.SetRelativeMouseMode(true)
 
     // Vsync rate
     sdl.GLSetSwapInterval(1)
@@ -68,21 +81,12 @@ func main() {
     glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, 3*16), gl.DYNAMIC_DRAW)
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
 
-    keyboardState := sdl.GetKeyboardState()
-
-    camPos := mgl64.Vec3{0.0, 0.0, 0.0}
-    worldUp := mgl64.Vec3{0.0, 1.0, 0.0}
-    camera := glf.NewCamera(camPos, worldUp, -90.0, 0.0, 0.02, 0.2)
-
+    var FrameCount int
+    var mouseX, mouseY int32
     var elapsedTime float64
     var deltaT float64
     var timeCount float64
-    var FrameCount int
 
-    var mouseX, mouseY int32
-
-    var FrameRateLimit int = 500
-    maxFrameTime := float64(1000) / float64(FrameRateLimit) // in milliseconds
     for {
         frameStart := time.Now()
         mouseX, mouseY = 0, 0
@@ -96,16 +100,37 @@ func main() {
                 case sdl.WINDOWEVENT_SIZE_CHANGED:
                     winWidth, winHeight = window.GetSize()
                     gl.Viewport(0, 0, winWidth, winHeight)
+                    DisplayRatio = float64(winWidth) / float64(winHeight)
                 case sdl.WINDOWEVENT_FOCUS_GAINED: // Window gains focus
-                    sdl.SetRelativeMouseMode(true)
                     sdl.GLSetSwapInterval(0)
+                    MaxFrameTime = TimeFactor / FrameRateLimit // in milliseconds
                 case sdl.WINDOWEVENT_FOCUS_LOST:
-                    sdl.SetRelativeMouseMode(false)
                     sdl.GLSetSwapInterval(1)
+                    MaxFrameTime = TimeFactor / 15
+                }
+            case *sdl.KeyboardEvent:
+                switch event.Keysym.Sym {
+                case sdl.K_ESCAPE:
+                    keys := make([]bool, 256) // 256 is the number of possible SDL keycodes
+                    if event.Type == sdl.KEYDOWN {
+                        keys[event.Keysym.Sym] = true
+                        InMenu = !InMenu
+                        if InMenu {
+                            sdl.SetRelativeMouseMode(false)
+                            println("mouse disabled")
+                        } else {
+                            sdl.SetRelativeMouseMode(true)
+                            println("mouse enabled")
+                        }
+                    } else if event.Type == sdl.KEYUP {
+                        keys[event.Keysym.Sym] = false
+                    }
                 }
             case *sdl.MouseMotionEvent:
-                mouseX += event.XRel
-                mouseY += event.YRel
+                if !InMenu {
+                    mouseX += event.XRel
+                    mouseY += event.YRel
+                }
             }
         }
 
@@ -126,16 +151,13 @@ func main() {
             dir = glf.Backward
             camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
         }
-        if keyboardState[sdl.SCANCODE_ESCAPE] != 0 {
-            sdl.SetRelativeMouseMode(false)
-        }
         camera.UpdateCamera(dir, deltaT, float64(mouseX), float64(mouseY))
 
         gl.ClearColor(0.1, 0.1, 0.1, 1.0)
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         ShaderProg1.Use()
-        projectionMatrix := mgl64.Perspective(mgl64.DegToRad(45.0), float64(winWidth)/float64(winHeight), 0.1, 100.0)
+        projectionMatrix := mgl64.Perspective(mgl64.DegToRad(45.0), DisplayRatio, 0.1, 100.0)
         viewMatrix := camera.GetViewMatrix()
         Mat4s[2] = projectionMatrix
         Mat4s[1] = viewMatrix
@@ -158,20 +180,20 @@ func main() {
         glf.CheckShadersforChanges()
 
         // Frame rate limiter
-        elapsedTime = float64(time.Since(frameStart).Milliseconds()) // elapsed time in ms
-        if elapsedTime < maxFrameTime {
-            time.Sleep(time.Duration(maxFrameTime-elapsedTime) * time.Millisecond)
-            elapsedTime = maxFrameTime // Update elapsedTime to the capped frame time
+        if elapsedTime < MaxFrameTime {
+            time.Sleep(time.Duration(MaxFrameTime-elapsedTime) * time.Nanosecond)
+            elapsedTime = MaxFrameTime // Update elapsedTime to the capped frame time
         }
 
         // FPS Counter
         timeCount += elapsedTime
         FrameCount++
-        if timeCount >= 1000.0 {
+        if timeCount >= TimeFactor {
             println(FrameCount)
             timeCount = 0.0
             FrameCount = 0
         }
+        elapsedTime = float64(time.Since(frameStart).Nanoseconds()) // elapsed time in ms
     }
 } 
 
