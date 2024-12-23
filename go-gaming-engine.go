@@ -29,7 +29,9 @@ var (
     vertices            []float32
 
     timeFactor          int64           = int64(time.Second/time.Nanosecond)
+    frameRateLimit      int64           = 120
     prevFrameLimit      int64           = frameRateLimit
+    maxFrameTime        int64           = 1e9 / frameRateLimit
 
     frameCount          int
 
@@ -39,7 +41,6 @@ var (
     computeTime         time.Duration  // the time it takes to render the frame
     elapsedTime         time.Duration
 
-    timeStart           time.Time       = time.Now()
     timeCount           time.Time       = time.Now()
     frameStart          time.Time      // the time you started generating the current frame
 
@@ -54,10 +55,10 @@ var (
     window              *sdl.Window
 
     shaderProg1         *glf.ShaderInfo
+
 )
 
 const (
-    frameRateLimit                                  int64           = 120
     fragPath = "./shaders/quadtexture.frag.glsl"
     vertPath = "./shaders/main.vert.glsl"
 )
@@ -129,14 +130,9 @@ func gameLoop() {
         frameRendering()
 
         elapsedTime = time.Since(frameStart) // elapsed time in ns
-        computeTime = time.Since(frameStart)
-        if frameRateLimit <= 5 {
-            fmt.Printf("Compute time = %v\n", computeTime)
-        }
 
         // Frame rate limiter
-        // for time.Since(frameStart).Nanoseconds() < maxFrameTime {}
-        limitFrameRate(computeTime, int(frameRateLimit))
+        for time.Since(frameStart).Nanoseconds() < maxFrameTime {}
 
         // FPS Counter
         frameCount++
@@ -243,16 +239,5 @@ func frameRendering() {
     }
     window.GLSwap()
     glf.CheckShadersforChanges()
-}
-
-func limitFrameRate(elapsedTime time.Duration, fps int) {
-    minFrameTime := time.Duration(1e3 / float32(fps)) * time.Millisecond
-    if elapsedTime < minFrameTime {
-        waitTime := minFrameTime - elapsedTime
-        if frameRateLimit <= 5 {
-            fmt.Printf("Waiting for %v...\n", waitTime)
-        }
-        time.Sleep(waitTime)
-    }
 }
 
