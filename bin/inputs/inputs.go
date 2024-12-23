@@ -7,12 +7,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var (
-    keyboardState = sdl.GetKeyboardState()
-    camera = vars.Camera
-    window = vars.Window
-)
-
 func PollEvents() bool {
     vars.MouseX, vars.MouseY = 0, 0
     for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
@@ -22,7 +16,7 @@ func PollEvents() bool {
         case *sdl.WindowEvent:
             switch event.Event {
             case sdl.WINDOWEVENT_SIZE_CHANGED:
-                vars.WinWidth, vars.WinHeight = window.GetSize()
+                vars.WinWidth, vars.WinHeight = vars.Window.GetSize()
                 gl.Viewport(0, 0, vars.WinWidth, vars.WinHeight)
                 vars.DisplayRatio = float64(vars.WinWidth) / float64(vars.WinHeight)
             case sdl.WINDOWEVENT_FOCUS_GAINED:
@@ -63,23 +57,23 @@ func PollEvents() bool {
 
 func CameraEvents() {
     dir := glf.NoWhere
-    deltaT := float64(vars.ElapsedTime.Milliseconds())
-    if keyboardState[sdl.SCANCODE_LEFT] != 0 || keyboardState[sdl.SCANCODE_A] != 0 {
+    deltaT := float64(vars.ElapsedTime.Milliseconds()) * 0.1
+    if vars.KeyboardState[sdl.SCANCODE_LEFT] != 0 || vars.KeyboardState[sdl.SCANCODE_A] != 0 {
         dir = glf.Left
-        camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
+        vars.Camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
     }
-    if keyboardState[sdl.SCANCODE_RIGHT] != 0 || keyboardState[sdl.SCANCODE_D] != 0 {
+    if vars.KeyboardState[sdl.SCANCODE_RIGHT] != 0 || vars.KeyboardState[sdl.SCANCODE_D] != 0 {
         dir = glf.Right
-        camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
+        vars.Camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
     }
-    if keyboardState[sdl.SCANCODE_UP] != 0 || keyboardState[sdl.SCANCODE_W] != 0 {
+    if vars.KeyboardState[sdl.SCANCODE_UP] != 0 || vars.KeyboardState[sdl.SCANCODE_W] != 0 {
         dir = glf.Forward
-        camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
+        vars.Camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
     }
-    if keyboardState[sdl.SCANCODE_DOWN] != 0 || keyboardState[sdl.SCANCODE_S] != 0 {
+    if vars.KeyboardState[sdl.SCANCODE_DOWN] != 0 || vars.KeyboardState[sdl.SCANCODE_S] != 0 {
         dir = glf.Backward
-        camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
+        vars.Camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
     }
-    camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
+    vars.Camera.UpdateCamera(dir, deltaT, float64(vars.MouseX), float64(vars.MouseY))
 }
 

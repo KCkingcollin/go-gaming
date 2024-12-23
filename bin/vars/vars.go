@@ -11,6 +11,8 @@ import (
 var (
     InMenu              bool            = true
 
+    KeyboardState       []uint8         = sdl.GetKeyboardState()
+
     UBO1                uint32
     VAO                 uint32
     Texture             uint32

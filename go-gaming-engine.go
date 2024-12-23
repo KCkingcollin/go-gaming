@@ -16,16 +16,13 @@ import (
 
 var (
     err error
-    window = vars.Window
-    shaderProg1 = vars.ShaderProg1
-    camera = vars.Camera
 )
 
 func main() {
     initWindow()
     initBuffers()
     defer sdl.Quit()
-    defer window.Destroy()
+    defer vars.Window.Destroy()
     for {
         frameStart := time.Now()
         if inputs.PollEvents() {
@@ -56,7 +53,7 @@ func initWindow() {
     sdl.SetHint(sdl.HINT_VIDEO_WAYLAND_PREFER_LIBDECOR, "1")
     sdl.SetHint(sdl.HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0")
 
-    window, err = sdl.CreateWindow("GO Gaming Engine",
+    vars.Window, err = sdl.CreateWindow("GO Gaming Engine",
     sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
     vars.WinWidth, vars.WinHeight,
     sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
@@ -64,7 +61,7 @@ func initWindow() {
         panic(err)
     }
 
-    if _, err = window.GLCreateContext(); err != nil {
+    if _, err = vars.Window.GLCreateContext(); err != nil {
         panic(err)
     }
 
@@ -83,9 +80,9 @@ func initWindow() {
 }
 
 func initBuffers() {
-    shaderProg1, err = glf.NewShaderProgram(vars.VertPath, vars.FragPath)
+    vars.ShaderProg1, err = glf.NewShaderProgram(vars.VertPath, vars.FragPath)
     if err != nil && ghf.Verbose {
-        fmt.Printf("Failed to link shaders: %s \n", err)
+        fmt.Printf("Failed to link Shaders: %s \n", err)
     } else if ghf.Verbose {
         println("Program linked successfully")
     }
@@ -99,9 +96,9 @@ func frameRendering() {
     gl.ClearColor(0.1, 0.1, 0.1, 1.0)
     gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    shaderProg1.Use()
+    vars.ShaderProg1.Use()
     projectionMatrix := mgl64.Perspective(mgl64.DegToRad(45.0), vars.DisplayRatio, 0.1, 100.0)
-    viewMatrix := camera.GetViewMatrix()
+    viewMatrix := vars.Camera.GetViewMatrix()
     vars.Mat4s[2] = projectionMatrix
     vars.Mat4s[1] = viewMatrix
 
@@ -118,7 +115,7 @@ func frameRendering() {
 
         gl.DrawArrays(gl.TRIANGLES, 0, int32(len(vars.Vertices)/5*3))
     }
-    window.GLSwap()
+    vars.Window.GLSwap()
     glf.CheckShadersforChanges()
 }
 
