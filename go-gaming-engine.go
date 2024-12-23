@@ -38,7 +38,6 @@ var (
 
     elapsedTime         time.Duration
 
-    limiterStart           time.Time       = time.Now()
     timeCount           time.Time       = time.Now()
     frameStart          time.Time      // the time you started generating the current frame
 
