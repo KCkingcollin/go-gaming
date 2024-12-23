@@ -28,11 +28,10 @@ var (
 
     vertices            []float32
 
-    timeFactor          int64           = int64(time.Second/time.Nanosecond)
     frameRateLimit      int64           = 500
     prevFrameLimit      int64           = frameRateLimit
-
-    frameCount          int
+    backgroundLimit     int64           = 15 
+    frameCount          int64
 
     displayRatio        float64         = float64(winWidth / winHeight)
     deltaT              float64
@@ -55,11 +54,13 @@ var (
 
     shaderProg1         *glf.ShaderInfo
 
+    frameTime           int64
 )
 
 const (
-    fragPath = "./shaders/quadtexture.frag.glsl"
-    vertPath = "./shaders/main.vert.glsl"
+    fragPath            string          = "./shaders/quadtexture.frag.glsl"
+    vertPath            string          = "./shaders/main.vert.glsl"
+    timeFactor          int64           = int64(time.Second/time.Nanosecond)
 )
 
 func main() {
@@ -75,18 +76,17 @@ func main() {
         cameraEvents()
         frameRendering()
 
-        elapsedTime = time.Since(frameStart) // elapsed time in ns
-
         // Frame rate limiter
-        for time.Since(frameStart).Nanoseconds() < 1e9 / int64(frameRateLimit) {}
+        for time.Since(frameStart).Nanoseconds() < timeFactor / frameRateLimit {}
 
         // FPS Counter
-        frameCount++
+        frameTime = time.Since(frameStart).Nanoseconds()
         if time.Since(timeCount).Nanoseconds() >= timeFactor {
+            frameCount = timeFactor / frameTime
             println(frameCount)
             timeCount = time.Now()
-            frameCount = 0
         }
+        elapsedTime = time.Since(frameStart) // elapsed time in ns
     }
 } 
 
@@ -155,7 +155,7 @@ func pollEvents() bool {
             case sdl.WINDOWEVENT_FOCUS_LOST:
                 sdl.GLSetSwapInterval(1)
                 prevFrameLimit = frameRateLimit
-                frameRateLimit = 5
+                frameRateLimit = backgroundLimit
             }
         case *sdl.KeyboardEvent:
             switch event.Keysym.Sym {
