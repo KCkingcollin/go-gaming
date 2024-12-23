@@ -15,7 +15,7 @@ import (
 var (
     err                 error
 
-    InMenu              bool            = true
+    inMenu              bool            = true
 
     keyboardState       []uint8         = sdl.GetKeyboardState()
 
@@ -26,40 +26,41 @@ var (
     winWidth, winHeight int32           = 854, 480
     mouseX, mouseY      int32
 
-    TimeFactor          int64           = int64(time.Second/time.Nanosecond)
-    FrameRateLimit      int64           = 120
-    prevFrameLimit      int64           = FrameRateLimit
-    MaxFrameTime        int64           = TimeFactor / FrameRateLimit // TimeFactor / FrameRateLimit
-
     vertices            []float32
 
-    DisplayRatio        float64         = float64(winWidth / winHeight)
-    deltaT              float64
+    timeFactor          int64           = int64(time.Second/time.Nanosecond)
+    prevFrameLimit      int64           = frameRateLimit
 
-    FrameCount          int
+    frameCount          int
+
+    displayRatio        float64         = float64(winWidth / winHeight)
+    deltaT              float64
 
     computeTime         time.Duration  // the time it takes to render the frame
     elapsedTime         time.Duration
 
-    TimeStart           time.Time       = time.Now()
-    TimeCount           time.Time       = time.Now()
+    timeStart           time.Time       = time.Now()
+    timeCount           time.Time       = time.Now()
     frameStart          time.Time      // the time you started generating the current frame
 
     camPos              mgl64.Vec3      = mgl64.Vec3{0.0, 0.0, 0.0}
     worldUp             mgl64.Vec3      = mgl64.Vec3{0.0, 1.0, 0.0}
+    positions           []mgl64.Vec3                     
+
+    Mat4s               []mgl64.Mat4    = make([]mgl64.Mat4, 3)
 
     camera              *glf.Camera     = glf.NewCamera(camPos, worldUp, -90.0, 0.0, 0.02, 0.2)
 
     window              *sdl.Window
 
-    positions           []mgl64.Vec3                     
-    ShaderProg1         *glf.ShaderInfo
-
-    Mat4s                               = make([]mgl64.Mat4, 3)
+    shaderProg1         *glf.ShaderInfo
 )
 
-const fragPath = "./shaders/quadtexture.frag.glsl"
-const vertPath = "./shaders/main.vert.glsl"
+const (
+    frameRateLimit                                  int64           = 120
+    fragPath = "./shaders/quadtexture.frag.glsl"
+    vertPath = "./shaders/main.vert.glsl"
+)
 
 func main() {
     initWindow()
@@ -106,7 +107,7 @@ func initWindow() {
 }
 
 func initBuffers() {
-    ShaderProg1, err = glf.NewShaderProgram(vertPath, fragPath)
+    shaderProg1, err = glf.NewShaderProgram(vertPath, fragPath)
     if err != nil && ghf.Verbose {
         fmt.Printf("Failed to link Shaders: %s \n", err)
     } else if ghf.Verbose {
@@ -129,20 +130,20 @@ func gameLoop() {
 
         elapsedTime = time.Since(frameStart) // elapsed time in ns
         computeTime = time.Since(frameStart)
-        if FrameRateLimit <= 5 {
+        if frameRateLimit <= 5 {
             fmt.Printf("Compute time = %v\n", computeTime)
         }
 
         // Frame rate limiter
-        // for time.Since(frameStart).Nanoseconds() < MaxFrameTime {}
-        limitFrameRate(computeTime, int(FrameRateLimit))
+        // for time.Since(frameStart).Nanoseconds() < maxFrameTime {}
+        limitFrameRate(computeTime, int(frameRateLimit))
 
         // FPS Counter
-        FrameCount++
-        if time.Since(TimeCount).Nanoseconds() >= TimeFactor {
-            println(FrameCount)
-            TimeCount = time.Now()
-            FrameCount = 0
+        frameCount++
+        if time.Since(timeCount).Nanoseconds() >= timeFactor {
+            println(frameCount)
+            timeCount = time.Now()
+            frameCount = 0
         }
     }
 }
@@ -158,14 +159,14 @@ func pollEvents() bool {
             case sdl.WINDOWEVENT_SIZE_CHANGED:
                 winWidth, winHeight = window.GetSize()
                 gl.Viewport(0, 0, winWidth, winHeight)
-                DisplayRatio = float64(winWidth) / float64(winHeight)
+                displayRatio = float64(winWidth) / float64(winHeight)
             case sdl.WINDOWEVENT_FOCUS_GAINED:
                 sdl.GLSetSwapInterval(0)
-                FrameRateLimit = prevFrameLimit
+                frameRateLimit = prevFrameLimit
             case sdl.WINDOWEVENT_FOCUS_LOST:
                 sdl.GLSetSwapInterval(1)
-                prevFrameLimit = FrameRateLimit
-                FrameRateLimit = 5
+                prevFrameLimit = frameRateLimit
+                frameRateLimit = 5
             }
         case *sdl.KeyboardEvent:
             switch event.Keysym.Sym {
@@ -173,8 +174,8 @@ func pollEvents() bool {
                 keys := make([]bool, 256)
                 if event.Type == sdl.KEYDOWN {
                     keys[event.Keysym.Sym] = true
-                    InMenu = !InMenu
-                    if InMenu {
+                    inMenu = !inMenu
+                    if inMenu {
                         sdl.SetRelativeMouseMode(false)
                         println("mouse disabled")
                     } else {
@@ -186,7 +187,7 @@ func pollEvents() bool {
                 }
             }
         case *sdl.MouseMotionEvent:
-            if !InMenu {
+            if !inMenu {
                 mouseX += event.XRel
                 mouseY += event.YRel
             }
@@ -221,8 +222,8 @@ func frameRendering() {
     gl.ClearColor(0.1, 0.1, 0.1, 1.0)
     gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    ShaderProg1.Use()
-    projectionMatrix := mgl64.Perspective(mgl64.DegToRad(45.0), DisplayRatio, 0.1, 100.0)
+    shaderProg1.Use()
+    projectionMatrix := mgl64.Perspective(mgl64.DegToRad(45.0), displayRatio, 0.1, 100.0)
     viewMatrix := camera.GetViewMatrix()
     Mat4s[2] = projectionMatrix
     Mat4s[1] = viewMatrix
@@ -248,7 +249,7 @@ func limitFrameRate(elapsedTime time.Duration, fps int) {
     minFrameTime := time.Duration(1e3 / float32(fps)) * time.Millisecond
     if elapsedTime < minFrameTime {
         waitTime := minFrameTime - elapsedTime
-        if FrameRateLimit <= 5 {
+        if frameRateLimit <= 5 {
             fmt.Printf("Waiting for %v...\n", waitTime)
         }
         time.Sleep(waitTime)
