@@ -29,18 +29,17 @@ var (
     vertices            []float32
 
     timeFactor          int64           = int64(time.Second/time.Nanosecond)
-    frameRateLimit      int64           = 120
+    frameRateLimit      int64           = 500
     prevFrameLimit      int64           = frameRateLimit
-    maxFrameTime        int64           = 1e9 / frameRateLimit
 
     frameCount          int
 
     displayRatio        float64         = float64(winWidth / winHeight)
     deltaT              float64
 
-    computeTime         time.Duration  // the time it takes to render the frame
     elapsedTime         time.Duration
 
+    limiterStart           time.Time       = time.Now()
     timeCount           time.Time       = time.Now()
     frameStart          time.Time      // the time you started generating the current frame
 
@@ -65,12 +64,30 @@ const (
 
 func main() {
     initWindow()
+    initBuffers()
     defer sdl.Quit()
     defer window.Destroy()
+    for {
+        frameStart = time.Now()
+        if pollEvents() {
+            return
+        }
+        cameraEvents()
+        frameRendering()
 
-    initBuffers()
+        elapsedTime = time.Since(frameStart) // elapsed time in ns
 
-    gameLoop()
+        // Frame rate limiter
+        for time.Since(frameStart).Nanoseconds() < 1e9 / int64(frameRateLimit) {}
+
+        // FPS Counter
+        frameCount++
+        if time.Since(timeCount).Nanoseconds() >= timeFactor {
+            println(frameCount)
+            timeCount = time.Now()
+            frameCount = 0
+        }
+    }
 } 
 
 func initWindow() {
@@ -118,30 +135,6 @@ func initBuffers() {
     UBO1 = glf.GenBindBuffers(gl.UNIFORM_BUFFER)
     glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, 3*16), gl.DYNAMIC_DRAW)
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
-}
-
-func gameLoop() {
-    for {
-        frameStart = time.Now()
-        if pollEvents() {
-            return
-        }
-        cameraEvents()
-        frameRendering()
-
-        elapsedTime = time.Since(frameStart) // elapsed time in ns
-
-        // Frame rate limiter
-        for time.Since(frameStart).Nanoseconds() < maxFrameTime {}
-
-        // FPS Counter
-        frameCount++
-        if time.Since(timeCount).Nanoseconds() >= timeFactor {
-            println(frameCount)
-            timeCount = time.Now()
-            frameCount = 0
-        }
-    }
 }
 
 func pollEvents() bool {
