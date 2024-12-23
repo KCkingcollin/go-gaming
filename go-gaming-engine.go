@@ -14,9 +14,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var (
-    err error
-)
+var err error
 
 func main() {
     initWindow()
@@ -45,6 +43,7 @@ func main() {
     }
 } 
 
+//Init sdl and gl 
 func initWindow() {
     if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
         panic(err)
@@ -79,6 +78,7 @@ func initWindow() {
     vars.Positions = spaces.WorldSpace()
 }
 
+//Init glsl buffers
 func initBuffers() {
     vars.ShaderProg1, err = glf.NewShaderProgram(vars.VertPath, vars.FragPath)
     if err != nil && ghf.Verbose {
@@ -92,6 +92,7 @@ func initBuffers() {
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, vars.UBO1)
 }
 
+//Render the frame
 func frameRendering() {
     gl.ClearColor(0.1, 0.1, 0.1, 1.0)
     gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

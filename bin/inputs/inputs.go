@@ -7,7 +7,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func PollEvents() bool {
+//Begin polling for window events
+func PollEvents() bool { 
     vars.MouseX, vars.MouseY = 0, 0
     for event := sdl.PollEvent(); event != nil;  event = sdl.PollEvent() {
         switch event := event.(type) {
@@ -55,6 +56,7 @@ func PollEvents() bool {
     return false
 }
 
+//Set camera position and rotation
 func CameraEvents() {
     dir := glf.NoWhere
     deltaT := float64(vars.ElapsedTime.Milliseconds()) * 0.1
