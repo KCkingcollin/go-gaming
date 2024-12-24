@@ -16,6 +16,7 @@ var (
     KeyboardState       []uint8         = sdl.GetKeyboardState()
 
     UBO1                uint32
+    UBO0                uint32
     VAO                 uint32
     Texture             uint32
 
@@ -23,6 +24,7 @@ var (
     MouseX, MouseY      int32
 
     Vertices            []float32
+    Normals             []float32
 
     FrameRateLimit      int64           = 500
     PrevFrameLimit      int64           = FrameRateLimit
@@ -36,9 +38,11 @@ var (
 
     CamPos              mgl64.Vec3      = mgl64.Vec3{0.0, 0.0, 0.0}
     WorldUp             mgl64.Vec3      = mgl64.Vec3{0.0, 1.0, 0.0}
-    Positions           []mgl64.Vec3                     
 
-    Mat4s               []mgl64.Mat4    = make([]mgl64.Mat4, 3)
+    Positions           []mgl64.Vec3                     
+    UBVec3s             []mgl64.Vec3    = make([]mgl64.Vec3, 2)
+
+    UBMat4s             []mgl64.Mat4    = make([]mgl64.Mat4, 3)
 
     Camera              *glf.Camera     = glf.NewCamera(CamPos, WorldUp, -90.0, 0.0, 0.02, 0.2)
 

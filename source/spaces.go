@@ -1,17 +1,24 @@
+// Code for setting up spaces
 package source
 
 import (
 	"github.com/KCkingcollin/go-help-func/glf"
-	"github.com/go-gl/gl/v4.6-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-// Returns the, vertice positions, texture ID, and VAO ID in that order
-// 
-//  - Returns the vertices of the object in a slice of float32s
+// Returns the, vertices + texture locations, normals, texture ID, and VAO ID in that order.
+//
+// Returns a slice of float32s formated as a vec3 and a vec2 in a slice of float32s in this order:
+//  - Vertex positions (3 float32s)
+//  - Texture positions (2 float32s)
+//
+// Returns a slice of float32s formated as a vec3 in a slice of float32s in this order:
+//  - Normals (3 float32s)
+//
+// Returns these after in this order:
 //  - Returns the texture ID as a uint32
-//  - Returns the VAO ID as a uint32
-func LocalSpace() ([]float32, uint32, uint32) {
+func LocalSpace() ([]float32, []float32, uint32) {
     texture := glf.LoadTexture("./assets/metalbox_full.png")
 
 	vertices := []float32{
@@ -57,18 +64,30 @@ func LocalSpace() ([]float32, uint32, uint32) {
 		-0.5, 0.5, 0.5, 0.0, 0.0,
 		-0.5, 0.5, -0.5, 0.0, 1.0, 
     }
+
+    normals := make([]float32, len(vertices)/5*3)
+    for tri := 0; tri < len(vertices)/5/3; tri++ {
+        i := tri * 15
+        p1 := mgl32.Vec3{vertices[i], vertices[i+1], vertices[i+2]}
+        i += 5
+        p2 := mgl32.Vec3{vertices[i], vertices[i+1], vertices[i+2]}
+        i += 5
+        p3 := mgl32.Vec3{vertices[i], vertices[i+1], vertices[i+2]}
+        normal := glf.TriangleNormalCalc(p1, p2, p3)
+        normals[tri*9] = normal.X()
+        normals[tri*9+1] = normal.Y()
+        normals[tri*9+2] = normal.Z()
+
+        normals[tri*9+3] = normal.X()
+        normals[tri*9+4] = normal.Y()
+        normals[tri*9+5] = normal.Z()
+
+        normals[tri*9+6] = normal.X()
+        normals[tri*9+7] = normal.Y()
+        normals[tri*9+8] = normal.Z()
+    }
     
-    glf.GenBindBuffers(gl.ARRAY_BUFFER)
-    VAO := glf.GenBindArrays()
-    glf.BufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-
-    gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 5*4, nil)
-    gl.EnableVertexAttribArray(0)
-    gl.VertexAttribPointerWithOffset(1, 2, gl.FLOAT, false, 5*4, 3*4)
-    gl.EnableVertexAttribArray(1)
-    gl.BindVertexArray(0)
-
-    return vertices, texture, VAO
+    return vertices, normals, texture
 }
 
 //Returns the positions of objects in order via a slice of Vec3s 
