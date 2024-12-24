@@ -1,4 +1,4 @@
-package bin
+package source
 
 import (
 	"github.com/KCkingcollin/go-help-func/glf"

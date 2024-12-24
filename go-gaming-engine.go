@@ -1,6 +1,5 @@
 package main
 
-import "github.com/KCkingcollin/go-gaming/bin"
+import "github.com/KCkingcollin/go-gaming/source"
 
-func main() {bin.Main()} 
-
+func main() {source.Main()} 
