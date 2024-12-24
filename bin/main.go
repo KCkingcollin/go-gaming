@@ -11,7 +11,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-//Init sdl and gl 
+// Init sdl and gl 
 func InitWindow() {
     if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
         panic(err)
@@ -42,7 +42,7 @@ func InitWindow() {
     glf.PrintVersionGL()
 }
 
-//Init glsl buffers
+// Init glsl buffers
 func InitBuffers() {
     Vertices, Texture, VAO = LocalSpace()
     Positions = WorldSpace()
@@ -59,7 +59,7 @@ func InitBuffers() {
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
 }
 
-//Render the frame
+// Render the frame
 func frameRendering() {
     gl.ClearColor(0.1, 0.1, 0.1, 1.0)
     gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -87,7 +87,7 @@ func frameRendering() {
     glf.CheckShadersforChanges()
 }
 
-//Start main game loop
+// Start main game loop
 func MainLoop() {
     for {
         frameStart := time.Now()
