@@ -1,4 +1,4 @@
-package vars
+package bin
 
 import (
 	"time"
@@ -9,6 +9,8 @@ import (
 )
 
 var (
+    err                 error 
+
     InMenu              bool            = true
 
     KeyboardState       []uint8         = sdl.GetKeyboardState()
