@@ -1,15 +1,6 @@
 package main
 
-import (
-	"github.com/KCkingcollin/go-gaming/bin"
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/KCkingcollin/go-gaming/bin"
 
-func main() {
-    bin.InitWindow()
-    bin.InitBuffers()
-    bin.MainLoop()
-    defer sdl.Quit()
-    defer bin.Window.Destroy()
-} 
+func main() {bin.Main()} 
 

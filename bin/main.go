@@ -11,6 +11,32 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+func Main() {
+    InitWindow()
+    InitBuffers()
+    defer sdl.Quit()
+    defer Window.Destroy()
+    // Main game loop
+    for {
+        frameStart := time.Now()
+        if PollEvents() {
+            return
+        }
+        CameraEvents()
+        frameRendering()
+
+        for time.Since(frameStart).Nanoseconds() < int64(float64(TimeFactor / FrameRateLimit) * 0.999) {}
+
+        frameTime := time.Since(frameStart).Nanoseconds()
+        if time.Since(TimeCount).Nanoseconds() >= TimeFactor {
+            frameCount := TimeFactor / frameTime
+            println(frameCount)
+            TimeCount = time.Now()
+        }
+        ElapsedTime = time.Since(frameStart)
+    }
+}
+
 // Init sdl and gl 
 func InitWindow() {
     if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
@@ -85,27 +111,5 @@ func frameRendering() {
     }
     Window.GLSwap()
     glf.CheckShadersforChanges()
-}
-
-// Start main game loop
-func MainLoop() {
-    for {
-        frameStart := time.Now()
-        if PollEvents() {
-            return
-        }
-        CameraEvents()
-        frameRendering()
-
-        for time.Since(frameStart).Nanoseconds() < int64(float64(TimeFactor / FrameRateLimit) * 0.999) {}
-
-        frameTime := time.Since(frameStart).Nanoseconds()
-        if time.Since(TimeCount).Nanoseconds() >= TimeFactor {
-            frameCount := TimeFactor / frameTime
-            println(frameCount)
-            TimeCount = time.Now()
-        }
-        ElapsedTime = time.Since(frameStart)
-    }
 }
 
