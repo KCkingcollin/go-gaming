@@ -7,7 +7,6 @@ import (
 	"github.com/KCkingcollin/go-help-func/ghf"
 	"github.com/KCkingcollin/go-help-func/glf"
 	"github.com/go-gl/gl/v4.6-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -96,13 +95,8 @@ func InitBuffers() {
     gl.EnableVertexAttribArray(2)
     gl.BindVertexArray(0)
     
-    UBO0 = glf.GenBindBuffers(gl.UNIFORM_BUFFER)
-    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, len(UBMat4s)*16), gl.DYNAMIC_DRAW)
-    gl.BindBufferBase(gl.UNIFORM_BUFFER, 0, UBO0)
-
-    UBO1 = glf.GenBindBuffers(gl.UNIFORM_BUFFER)
-    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, len(UBVec3s)*4), gl.DYNAMIC_DRAW)
-    gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
+    UBO0 = glf.CreateNewUniformBuffer(UBMat4s, 0)
+    UBO1 = glf.CreateNewUniformBuffer(UBVec3s, 1)
 
     UBVec3s = []mgl64.Vec3 {
         {2.0, 5.0, -8.0},  // lightPos
@@ -130,14 +124,14 @@ func frameRendering() {
         modelMatrix = mgl64.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(modelMatrix)
         UBMat4s[0] = modelMatrix
 
-        glf.BindBufferSubData(ghf.Mgl64to32Slice(UBMat4s).([]mgl32.Mat4), UBO0)
+        glf.SetUBO(UBMat4s, UBO0)
 
         gl.DrawArrays(gl.TRIANGLES, 0, int32(len(Vertices)/5*3))
     }
     // ShaderProg1.SetVec3("lightPos", mgl32.Vec3{2.0, 5.0, 5.0})
     // ShaderProg1.SetVec3("lightColor", mgl32.Vec3{1.0, 1.0, 1.0})
 
-    glf.BindBufferSubData(ghf.Mgl64to32Slice(UBVec3s).([]mgl32.Vec3), UBO1)
+    glf.SetUBO(UBVec3s, UBO1)
 
     Window.GLSwap()
     glf.CheckShadersforChanges()
