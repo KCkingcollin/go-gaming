@@ -97,13 +97,17 @@ func InitBuffers() {
     gl.BindVertexArray(0)
     
     UBO0 = glf.GenBindBuffers(gl.UNIFORM_BUFFER)
-    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, len(UBVec3s)*3), gl.DYNAMIC_DRAW)
+    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, len(UBMat4s)*16), gl.DYNAMIC_DRAW)
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 0, UBO0)
-    glf.BindBufferSubData(ghf.Mgl64to32Slice(UBVec3s).([]mgl32.Vec3), UBO0, 0)
 
     UBO1 = glf.GenBindBuffers(gl.UNIFORM_BUFFER)
-    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, len(UBMat4s)*16), gl.DYNAMIC_DRAW)
+    glf.BufferData(gl.UNIFORM_BUFFER, make([]float32, len(UBVec3s)*4), gl.DYNAMIC_DRAW)
     gl.BindBufferBase(gl.UNIFORM_BUFFER, 1, UBO1)
+
+    UBVec3s = []mgl64.Vec3 {
+        {2.0, 5.0, -8.0},  // lightPos
+        {1.0, 1.0, 1.0},   // lightColor
+    }
 }
 
 // Render the frame
@@ -126,10 +130,15 @@ func frameRendering() {
         modelMatrix = mgl64.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(modelMatrix)
         UBMat4s[0] = modelMatrix
 
-        glf.BindBufferSubData(ghf.Mgl64to32Slice(UBMat4s).([]mgl32.Mat4), UBO1, 1)
+        glf.BindBufferSubData(ghf.Mgl64to32Slice(UBMat4s).([]mgl32.Mat4), UBO0)
 
         gl.DrawArrays(gl.TRIANGLES, 0, int32(len(Vertices)/5*3))
     }
+    // ShaderProg1.SetVec3("lightPos", mgl32.Vec3{2.0, 5.0, 5.0})
+    // ShaderProg1.SetVec3("lightColor", mgl32.Vec3{1.0, 1.0, 1.0})
+
+    glf.BindBufferSubData(ghf.Mgl64to32Slice(UBVec3s).([]mgl32.Vec3), UBO1)
+
     Window.GLSwap()
     glf.CheckShadersforChanges()
 }
