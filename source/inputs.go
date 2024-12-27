@@ -39,10 +39,10 @@ func PollEvents() bool {
                     InMenu = !InMenu
                     if InMenu {
                         sdl.SetRelativeMouseMode(false)
-                        println("Mouse disabled")
+                        println("Input disabled")
                     } else {
                         sdl.SetRelativeMouseMode(true)
-                        println("Mouse enabled")
+                        println("Input enabled")
                     }
                 } else if event.Type == sdl.KEYUP {
                     keys[event.Keysym.Sym] = false
@@ -62,22 +62,24 @@ func PollEvents() bool {
 func CameraEvents() {
     dir := glf.NoWhere
     deltaT := float64(ElapsedTime.Milliseconds()) * 0.1
-    if KeyboardState[sdl.SCANCODE_LEFT] != 0 || KeyboardState[sdl.SCANCODE_A] != 0 {
-        dir = glf.Left
+    if !InMenu {
+        if KeyboardState[sdl.SCANCODE_LEFT] != 0 || KeyboardState[sdl.SCANCODE_A] != 0 {
+            dir = glf.Left
+            Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
+        }
+        if KeyboardState[sdl.SCANCODE_RIGHT] != 0 || KeyboardState[sdl.SCANCODE_D] != 0 {
+            dir = glf.Right
+            Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
+        }
+        if KeyboardState[sdl.SCANCODE_UP] != 0 || KeyboardState[sdl.SCANCODE_W] != 0 {
+            dir = glf.Forward
+            Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
+        }
+        if KeyboardState[sdl.SCANCODE_DOWN] != 0 || KeyboardState[sdl.SCANCODE_S] != 0 {
+            dir = glf.Backward
+            Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
+        }
         Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
     }
-    if KeyboardState[sdl.SCANCODE_RIGHT] != 0 || KeyboardState[sdl.SCANCODE_D] != 0 {
-        dir = glf.Right
-        Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
-    }
-    if KeyboardState[sdl.SCANCODE_UP] != 0 || KeyboardState[sdl.SCANCODE_W] != 0 {
-        dir = glf.Forward
-        Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
-    }
-    if KeyboardState[sdl.SCANCODE_DOWN] != 0 || KeyboardState[sdl.SCANCODE_S] != 0 {
-        dir = glf.Backward
-        Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
-    }
-    Camera.UpdateCamera(dir, deltaT, float64(MouseX), float64(MouseY))
 }
 

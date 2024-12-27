@@ -9,3 +9,5 @@ require (
 	github.com/go-gl/mathgl v1.2.0
 	github.com/veandco/go-sdl2 v0.4.40
 )
+
+require github.com/x448/float16 v0.8.4 // indirect

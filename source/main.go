@@ -128,8 +128,6 @@ func frameRendering() {
 
         gl.DrawArrays(gl.TRIANGLES, 0, int32(len(Vertices)/5*3))
     }
-    // ShaderProg1.SetVec3("lightPos", mgl32.Vec3{2.0, 5.0, 5.0})
-    // ShaderProg1.SetVec3("lightColor", mgl32.Vec3{1.0, 1.0, 1.0})
 
     glf.SetUBO(UBVec3s, UBO1)
 
