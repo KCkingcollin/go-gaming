@@ -21,48 +21,63 @@ import (
 func LocalSpace() ([]float32, []float32, uint32) {
     texture := glf.LoadTexture("./assets/metalbox_full.png")
 
-	vertices := []float32{
-		-0.5, -0.5, -0.5, 0.0, 0.0,
-		0.5, -0.5, -0.5, 1.0, 0.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		-0.5, 0.5, -0.5, 0.0, 1.0,
-		-0.5, -0.5, -0.5, 0.0, 0.0,
+    vertices := []float32{
+        // Cube vertices (position, followed by texture coordinates)
+        // These need to be grouped into triangles for each face
 
-		-0.5, -0.5, 0.5, 0.0, 0.0,
-		0.5, -0.5, 0.5, 1.0, 0.0,
-		0.5, 0.5, 0.5, 1.0, 1.0,
-		0.5, 0.5, 0.5, 1.0, 1.0,
-		-0.5, 0.5, 0.5, 0.0, 1.0,
-		-0.5, -0.5, 0.5, 0.0, 0.0,
+        // Front face (CCW)
+        -0.5, -0.5, -0.5, 0.0, 0.0,
+        0.5, -0.5, -0.5, 1.0, 0.0,
+        0.5, 0.5, -0.5, 1.0, 1.0,
 
-		-0.5, 0.5, 0.5, 1.0, 0.0,
-		-0.5, 0.5, -0.5, 1.0, 1.0,
-		-0.5, -0.5, -0.5, 0.0, 1.0,
-		-0.5, -0.5, -0.5, 0.0, 1.0,
-		-0.5, -0.5, 0.5, 0.0, 0.0,
-		-0.5, 0.5, 0.5, 1.0, 0.0,
+        0.5, 0.5, -0.5, 1.0, 1.0,
+        -0.5, 0.5, -0.5, 0.0, 1.0,
+        -0.5, -0.5, -0.5, 0.0, 0.0,
 
-		0.5, 0.5, 0.5, 1.0, 0.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		0.5, -0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, 0.5, 0.0, 0.0,
-		0.5, 0.5, 0.5, 1.0, 0.0,
+        // Back face (CCW)
+        -0.5, -0.5, 0.5, 0.0, 0.0,
+        0.5, -0.5, 0.5, 1.0, 0.0,
+        0.5, 0.5, 0.5, 1.0, 1.0,
 
-		-0.5, -0.5, -0.5, 0.0, 1.0,
-		0.5, -0.5, -0.5, 1.0, 1.0,
-		0.5, -0.5, 0.5, 1.0, 0.0,
-		0.5, -0.5, 0.5, 1.0, 0.0,
-		-0.5, -0.5, 0.5, 0.0, 0.0,
-		-0.5, -0.5, -0.5, 0.0, 1.0,
+        0.5, 0.5, 0.5, 1.0, 1.0,
+        -0.5, 0.5, 0.5, 0.0, 1.0,
+        -0.5, -0.5, 0.5, 0.0, 0.0,
 
-		-0.5, 0.5, -0.5, 0.0, 1.0,
-		0.5, 0.5, -0.5, 1.0, 1.0,
-		0.5, 0.5, 0.5, 1.0, 0.0,
-		0.5, 0.5, 0.5, 1.0, 0.0,
-		-0.5, 0.5, 0.5, 0.0, 0.0,
-		-0.5, 0.5, -0.5, 0.0, 1.0, 
+        // Left face (CCW)
+        -0.5, 0.5, 0.5, 1.0, 0.0,
+        -0.5, 0.5, -0.5, 1.0, 1.0,
+        -0.5, -0.5, -0.5, 0.0, 1.0,
+
+        -0.5, -0.5, -0.5, 0.0, 1.0,
+        -0.5, -0.5, 0.5, 0.0, 0.0,
+        -0.5, 0.5, 0.5, 1.0, 0.0,
+
+        // Right face (CCW)
+        0.5, 0.5, 0.5, 1.0, 0.0,
+        0.5, 0.5, -0.5, 1.0, 1.0,
+        0.5, -0.5, -0.5, 0.0, 1.0,
+
+        0.5, -0.5, -0.5, 0.0, 1.0,
+        0.5, -0.5, 0.5, 0.0, 0.0,
+        0.5, 0.5, 0.5, 1.0, 0.0,
+
+        // Bottom face (CCW)
+        -0.5, -0.5, -0.5, 0.0, 1.0,
+        0.5, -0.5, -0.5, 1.0, 1.0,
+        0.5, -0.5, 0.5, 1.0, 0.0,
+
+        0.5, -0.5, 0.5, 1.0, 0.0,
+        -0.5, -0.5, 0.5, 0.0, 0.0,
+        -0.5, -0.5, -0.5, 0.0, 1.0,
+
+        // Top face (CCW)
+        -0.5, 0.5, -0.5, 0.0, 1.0,
+        0.5, 0.5, -0.5, 1.0, 1.0,
+        0.5, 0.5, 0.5, 1.0, 0.0,
+
+        0.5, 0.5, 0.5, 1.0, 0.0,
+        -0.5, 0.5, 0.5, 0.0, 0.0,
+        -0.5, 0.5, -0.5, 0.0, 1.0,
     }
 
     normals := make([]float32, len(vertices)/5*3)
@@ -74,6 +89,10 @@ func LocalSpace() ([]float32, []float32, uint32) {
         i += 5
         p3 := mgl32.Vec3{vertices[i], vertices[i+1], vertices[i+2]}
         normal := glf.TriangleNormalCalc(p1, p2, p3)
+        // if true {
+        //     normal = normal.Mul(-1) // Flip the normal if the winding is clockwise
+        //     println("needs flipping")
+        // }
         normals[tri*9] = normal.X()
         normals[tri*9+1] = normal.Y()
         normals[tri*9+2] = normal.Z()
@@ -90,6 +109,13 @@ func LocalSpace() ([]float32, []float32, uint32) {
     return vertices, normals, texture
 }
 
+// // This function checks if the triangle formed by p1, p2, and p3 is clockwise
+// func IsClockwise(p1, p2, p3 mgl32.Vec3) bool {
+//     normal := glf.TriangleNormalCalc(p1, p2, p3)
+//     // Check the direction of the normal, the dot product with the positive Z-axis gives us an idea of the orientation
+//     return normal.Z() < 0
+// }
+//
 //Returns the positions of objects in order via a slice of Vec3s 
 func WorldSpace() []mgl64.Vec3 {
     positions := []mgl64.Vec3{

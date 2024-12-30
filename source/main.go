@@ -12,8 +12,10 @@ import (
 )
 
 func Main() {
+    LoadConfig(ConfigFile)
     InitWindow()
     InitBuffers()
+    go checkConfig()
     defer sdl.Quit()
     defer Window.Destroy()
     // Main game loop
@@ -25,15 +27,28 @@ func Main() {
         CameraEvents()
         frameRendering()
 
-        for time.Since(frameStart).Nanoseconds() < int64(float64(TimeFactor / FrameRateLimit) * 0.999) {}
+        for time.Since(frameStart).Nanoseconds() < int64(float64(TimeFactor / FrameRateLimit) * 0.999 * FrameSpeedFactor) {}
 
         frameTime := time.Since(frameStart).Nanoseconds()
-        if time.Since(TimeCount).Nanoseconds() >= TimeFactor {
+        if time.Since(Time).Nanoseconds() - SecondTime >= TimeFactor {
             frameCount := TimeFactor / frameTime
             println(frameCount)
-            TimeCount = time.Now()
+            SecondTime = time.Since(Time).Nanoseconds()
         }
         ElapsedTime = time.Since(frameStart)
+    }
+}
+
+// Checks for config updates
+func checkConfig() {
+    for {
+        time.Sleep(1 * time.Second)
+        if ghf.FileExists(ConfigFile) {
+            configModTimeNow := ghf.GetModifiedTime(ConfigFile)
+            if !ConfigModTime.Equal(configModTimeNow) {
+                LoadConfig(ConfigFile)
+            }
+        }
     }
 }
 
@@ -99,7 +114,7 @@ func InitBuffers() {
     UBO1 = glf.CreateNewUniformBuffer(UBVec3s, 1)
 
     UBVec3s = []mgl64.Vec3 {
-        {2.0, 5.0, -8.0},  // lightPos
+        {2.0, 5.0, 5.0},  // lightPos
         {1.0, 1.0, 1.0},   // lightColor
     }
 }

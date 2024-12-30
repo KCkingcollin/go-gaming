@@ -15,14 +15,12 @@ layout (binding = 1) uniform UBVec3s
     vec3 lightColor;
 };
 
-// uniform vec3 lightPos;
-// uniform vec3 lightColor;
-
 layout (binding = 0) uniform sampler2D texture1;
 
 void main() {
     //ambient
-    vec4 ambientLight = vec4(0.3, 0.3, 0.3, 1.0);
+    // vec4 ambientLight = vec4(0.3, 0.3, 0.3, 1.0);
+    vec4 ambientLight = vec4(lightColor, 1.0) * 0.3;
     
     //diffuse
     vec3 lightDir = normalize(lightPos - FragPos);
